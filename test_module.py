@@ -1,77 +1,68 @@
-import pytest
-
-from arithmetic_arranger import arithmetic_arranger
-
-test_cases = [
-    pytest.param(
-        [['3801 - 2', '123 + 49']],
-        '  3801      123\n'
-        '-    2    +  49\n'
-        '------    -----',
-        'Expected different output when calling "arithmetic_arranger()" with ["3801 - 2", "123 + 49"]',
-        id='test_two_problems_arrangement1'),
-    pytest.param(
-        [['1 + 2', '1 - 9380']],
-        '  1         1\n'
-        '+ 2    - 9380\n'
-        '---    ------',
-        'Expected different output when calling "arithmetic_arranger()" with ["1 + 2", "1 - 9380"]',
-        id='test_two_problems_arrangement2'),
-    pytest.param(
-        [['3 + 855', '3801 - 2', '45 + 43', '123 + 49']],
-        '    3      3801      45      123\n'
-        '+ 855    -    2    + 43    +  49\n'
-        '-----    ------    ----    -----',
-        'Expected different output when calling "arithmetic_arranger()" with ["3 + 855", "3801 - 2", "45 + 43", "123 + 49"]',
-        id='test_four_problems_arrangement'),
-    pytest.param(
-        [['11 + 4', '3801 - 2999', '1 + 2', '123 + 49', '1 - 9380']],
-        '  11      3801      1      123         1\n'
-        '+  4    - 2999    + 2    +  49    - 9380\n'
-        '----    ------    ---    -----    ------',
-        'Expected different output when calling "arithmetic_arranger()" with ["11 + 4", "3801 - 2999", "1 + 2", "123 + 49", "1 - 9380"]',
-        id='test_five_problems_arrangement'),
-    pytest.param(
-        [['44 + 815', '909 - 2', '45 + 43', '123 + 49',
-          '888 + 40', '653 + 87']],
-        'Error: Too many problems.',
-        'Expected calling "arithmetic_arranger()" with more than five problems to return "Error: Too many problems."',
-        id='test_too_many_problems'),
-    pytest.param(
-        [['3 / 855', '3801 - 2', '45 + 43', '123 + 49']],
-        "Error: Operator must be '+' or '-'.",
-        '''Expected calling "arithmetic_arranger()" with a problem that uses the "/" operator to return "Error: Operator must be '+' or '-'."''',
-        id='test_incorrect_operator'),
-    pytest.param(
-        [['24 + 85215', '3801 - 2', '45 + 43', '123 + 49']],
-        'Error: Numbers cannot be more than four digits.',
-        'Expected calling "arithmetic_arranger()" with a problem that has a number over 4 digits long to return "Error: Numbers cannot be more than four digits."',
-        id='test_too_many_digits'),
-    pytest.param(
-        [['98 + 3g5', '3801 - 2', '45 + 43', '123 + 49']],
-        'Error: Numbers must only contain digits.',
-        'Expected calling "arithmetic_arranger()" with a problem that contains a letter character in the number to return "Error: Numbers must only contain digits."',
-        id='test_only_digits'),
-    pytest.param(
-        [['3 + 855', '988 + 40'], True],
-        '    3      988\n'
-        '+ 855    +  40\n'
-        '-----    -----\n'
-        '  858     1028',
-        'Expected solutions to be correctly displayed in output when calling "arithmetic_arranger()" with ["3 + 855", "988 + 40"] and a second argument of `True`.',
-        id='test_two_problems_with_solutions'),
-    pytest.param(
-        [['32 - 698', '1 - 3801', '45 + 43', '123 + 49', '988 + 40'], True],
-        '   32         1      45      123      988\n'
-        '- 698    - 3801    + 43    +  49    +  40\n'
-        '-----    ------    ----    -----    -----\n'
-        ' -666     -3800      88      172     1028',
-        'Expected solutions to be correctly displayed in output when calling "arithmetic_arranger()" with five arithmetic problems and a second argument of `True`.',
-        id='test_five_problems_with_solutions'),
-]
+import unittest
+from time_calculator import add_time
 
 
-@pytest.mark.parametrize('arguments,expected_output,fail_message', test_cases)
-def test_template(arguments, expected_output, fail_message):
-    actual = arithmetic_arranger(*arguments)
-    assert actual == expected_output, fail_message
+class UnitTests(unittest.TestCase):
+    maxDiff = None
+    def test_same_period(self):
+        actual = add_time("3:30 PM", "2:12")
+        expected = "5:42 PM"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "3:30 PM", "2:12" to return "5:42 PM"')
+
+    def test_different_period(self):
+        actual = add_time("11:55 AM", "3:12")
+        expected = "3:07 PM"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "11:55 AM", "3:12" to return "3:07 PM"')
+
+    def test_next_day(self):
+        actual = add_time("9:15 PM", "5:30")
+        expected = "2:45 AM (next day)"
+        self.assertEqual(actual, expected, 'Expected time to end with "(next day)" when it is the next day.')
+
+    def test_period_change_at_twelve(self):
+        actual = add_time("11:40 AM", "0:25")
+        expected = "12:05 PM"
+        self.assertEqual(actual, expected, 'Expected period to change from AM to PM at 12:00')
+
+    def test_twenty_four(self):
+        actual = add_time("2:59 AM", "24:00")
+        expected = "2:59 AM (next day)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "2:59 AM", "24:00" to return "2:59 AM"')
+
+    def test_two_days_later(self):
+        actual = add_time("11:59 PM", "24:05")
+        expected = "12:04 AM (2 days later)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "11:59 PM", "24:05" to return "12:04 AM (2 days later)"')
+
+    def test_high_duration(self):
+        actual = add_time("8:16 PM", "466:02")
+        expected = "6:18 AM (20 days later)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "8:16 PM", "466:02" to return "6:18 AM (20 days later)"')
+
+    def test_no_change(self):
+        actual = add_time("5:01 AM", "0:00")
+        expected = "5:01 AM"
+        self.assertEqual(actual, expected, 'Expected adding 0:00 to return initial time.')
+
+    def test_same_period_with_day(self):
+        actual = add_time("3:30 PM", "2:12", "Monday")
+        expected = "5:42 PM, Monday"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "3:30 PM", "2:12", "Monday" to return "5:42 PM, Monday"')
+
+    def test_twenty_four_with_day(self):
+        actual = add_time("2:59 AM", "24:00", "saturDay")
+        expected = "2:59 AM, Sunday (next day)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "2:59 AM", "24:00", "saturDay" to return "2:59 AM, Sunday (next day)"')
+
+    def test_two_days_later_with_day(self):
+        actual = add_time("11:59 PM", "24:05", "Wednesday")
+        expected = "12:04 AM, Friday (2 days later)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "11:59 PM", "24:05", "Wednesday" to return "12:04 AM, Friday (2 days later)"')
+
+    def test_high_duration_with_day(self):
+        actual = add_time("8:16 PM", "466:02", "tuesday")
+        expected = "6:18 AM, Monday (20 days later)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "8:16 PM", "466:02", "tuesday" to return "6:18 AM, Monday (20 days later)"')
+
+if __name__ == "__main__":
+    unittest.main()
